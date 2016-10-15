@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sundy.dao.ClotheStyleDao">
+
+
+	<resultMap id="clotheStyleBeanResultMap" type="com.sundy.domain.ClotheStyleBean">
+		<result property="id" column="id"/>
+		<result property="styleName" column="styleName"/>
+	    <result property="styleCode" column="styleCode"/>
+		<result property="styleNum" column="styleNum"/>
+	    <result property="createDate" column="createDate"/>
+	    <result property="updateDate" column="updateDate"/>
+	</resultMap>
+	
+	<!--属性-->
+	<parameterMap id="clotheStyleBeanParameterMap" type="com.sundy.domain.ClotheStyleBean">
+		<parameter property="id"/>
+		<parameter property="styleName"/>
+		<parameter property="styleCode"/>
+		<parameter property="styleNum"/>
+		<parameter property="createDate"/>
+		<parameter property="updateDate"/>
+	</parameterMap>
+
+    <select id="getClotheStyleBean" resultMap="clotheStyleBeanResultMap" parameterType="java.lang.Integer">
+	    select * from jk_clothe_style where 1=1 and id=#{id}
+	</select>	
+
+	<select id="queryClotheStyleBean" resultMap="clotheStyleBeanResultMap" parameterType="java.util.Map">
+	    select * from jk_clothe_style where 1=1 
+	      <if test="styleName != null">
+	             <![CDATA[
+	                 and styleName like '%${styleName}%'
+	              ]]>  
+		   </if>
+	      limit #{rowNum},#{pageSize}
+	</select>
+	
+	<select id="queryCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+	    select count(*) from jk_clothe_style where 1=1
+	    <if test="styleName != null">
+	             <![CDATA[
+	                 and styleName like '%${styleName}%'
+	              ]]>  
+		 </if>
+	</select>
+	
+	<!--新增-->
+	<insert id="insert" parameterMap="clotheStyleBeanParameterMap" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO jk_clothe_style (id,styleName, styleCode, styleNum, createDate, updateDate) VALUES (?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="clotheStyleBeanParameterMap">
+		update jk_clothe_style set
+		<trim suffixOverrides=",">
+			<if test="styleName != null">
+				`styleName`=#{styleName},
+			</if>
+			<if test="styleCode != null">
+				`styleCode`=#{styleCode},
+			</if>
+			<if test="styleNum != null">
+				`styleNum`=#{styleNum},
+			</if>
+			<if test="updateDate != null">
+				`updateDate`=now()
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from jk_clothe_style where id=#{id}
+	</delete>
+	
+		<!--删除-->
+	<delete id="deleteProcessByStyleId" parameterType="java.lang.Integer">
+		delete from jk_clothe_process where styleId=#{styleId}
+	</delete>
+	
+		<!--删除-->
+	<delete id="deleteFinishNumByStyleId" parameterType="java.lang.Integer">
+		delete from jk_process_finish where processId in (select a.id from jk_clothe_process a where a.styleId=#{styleId})
+	</delete>
+	
+</mapper>

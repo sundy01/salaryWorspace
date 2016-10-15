@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sundy.dao.ClotheProcessDao">
+
+
+	<resultMap id="processBeanResultMap" type="com.sundy.domain.ProcessBean">
+		<result property="id" column="id"/>
+		<result property="styleId" column="styleId"/>
+	    <result property="styleName" column="styleName"/>
+		<result property="processName" column="processName"/>
+		<result property="processPrice" column="processPrice"/>
+	    <result property="createDate" column="createDate"/>
+	    <result property="updateDate" column="updateDate"/>
+	</resultMap>
+	
+	<resultMap id="styleItemResultMap" type="com.sundy.domain.StyleItem">
+		<result property="key" column="id"/>
+		<result property="value" column="styleName"/>
+	</resultMap>
+	
+	<!--属性-->
+	<parameterMap id="processBeanParameterMap" type="com.sundy.domain.ProcessBean">
+		<parameter property="id"/>
+		<parameter property="styleId"/>
+		<parameter property="processName"/>
+		<parameter property="processPrice"/>
+		<parameter property="createDate"/>
+		<parameter property="updateDate"/>
+	</parameterMap>
+	
+	<select id="queryAllStyle" resultMap="styleItemResultMap">
+	   select id,styleName from jk_clothe_style
+	</select>
+	
+	
+		<select id="queryProcessBeanByStyleCode" resultMap="processBeanResultMap" parameterType="java.util.Map">
+		                      SELECT
+								    a.id,
+								    a.styleId,
+								    b.styleName,
+								    a.processName,
+								    a.processPrice,
+								    a.createDate,
+								    a.updateDate
+								FROM
+								    jk_clothe_process a,
+								    jk_clothe_style b
+								WHERE
+								    a.styleId=b.id
+								AND b.styleCode=#{styleCode}
+	    </select>
+	
+
+	<select id="queryProcessBean" resultMap="processBeanResultMap" parameterType="java.util.Map">
+	    SELECT
+			    id,
+			    styleId,
+			    (
+			        SELECT
+			            styleName
+			        FROM
+			            jk_clothe_style a
+			        WHERE
+			            a.id=b.styleId) AS styleName,
+			    processName,
+			    processPrice,
+			    createDate,
+			    updateDate
+		FROM
+		    jk_clothe_process b
+		WHERE
+		    1=1 and styleId=#{styleId} limit #{rowNum},#{pageSize}
+	</select>
+	
+	<select id="getProcessBeanById" resultMap="processBeanResultMap" parameterType="java.lang.Integer">
+	    SELECT
+			    id,
+			    styleId,
+			    (
+			        SELECT
+			            styleName
+			        FROM
+			            jk_clothe_style a
+			        WHERE
+			            a.id=b.styleId) AS styleName,
+			    processName,
+			    processPrice,
+			    createDate,
+			    updateDate
+		FROM
+		    jk_clothe_process b
+		WHERE
+		    1=1 and id=#{id}
+	</select>
+	
+	<select id="queryCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+	    select count(*) from jk_clothe_process where styleId=#{styleId}
+	</select>
+	
+	<!--新增-->
+	<insert id="insert" parameterMap="processBeanParameterMap" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO jk_clothe_process (id,styleId, processName, processPrice, createDate, updateDate) VALUES (?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="processBeanParameterMap">
+		update jk_clothe_process set
+		<trim suffixOverrides=",">
+			<if test="styleId != null">
+				`styleId`=#{styleId},
+			</if>
+			<if test="processName != null">
+				`processName`=#{processName},
+			</if>
+			<if test="processPrice != null">
+				`processPrice`=#{processPrice},
+			</if>
+			<if test="updateDate != null">
+				`updateDate`=now()
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from jk_clothe_process where id=#{id}
+	</delete>
+	
+		<!--删除-->
+	<delete id="deleteUserFinishNum" parameterType="java.lang.Integer">
+		delete from jk_process_finish where processId=#{id}
+	</delete>
+	
+</mapper>

@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sundy.dao.PayMoneyDao">
+
+
+	<resultMap id="payMoneyBeanResultMap" type="com.sundy.domain.PayMoneyBean">
+		<result property="id" column="id"/>
+		<result property="styleCode" column="styleCode"/>
+	    <result property="employeeName" column="employeeName"/>
+		<result property="processName" column="processName"/>
+		<result property="processPrice" column="processPrice"/>
+	    <result property="createDate" column="createDate"/>
+	    <result property="finishNum" column="finishNum"/>
+	    <result property="payMoney" column="payMoney"/>
+	</resultMap>
+	
+	
+	
+	<select id="queryPayMoneyBean" resultMap="payMoneyBeanResultMap" parameterType="java.util.Map">
+		                  select 
+							m.id,
+							m.styleCode,
+							m.styleId,
+							m.employeeName,
+							m.employeeId,
+							m.processName,
+							m.processPrice,
+							m.finishNum,
+							(m.processPrice * m.finishNum) as payMoney,
+							m.createDate 
+							from (
+							SELECT
+							    a.id,
+							    (select c.id from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as styleId,
+							    (select c.styleCode from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as styleCode,
+							    (select t.name from jk_student t where t.id=a.employeeId) as employeeName,
+							    a.employeeId,
+							    (select b.processName from jk_clothe_process b where b.id=a.processId) as processName,
+							    (select b.processPrice from jk_clothe_process b where b.id=a.processId) as processPrice,
+							    a.finishNum,
+							    a.createDate
+							FROM
+							    jk_process_finish a
+							WHERE
+							    1=1 
+							) m  where 1=1 
+							<if test="styleCode != null">
+					             <![CDATA[
+					                and m.styleCode like '%${styleCode}%'
+					              ]]>  
+		   				    </if>
+		   				    <if test="employeeId != null">
+					             <![CDATA[
+					               and m.employeeId=#{employeeId}
+					              ]]>  
+		   				    </if>
+		   				    <if test="startPayDate != null">
+					             <![CDATA[
+					               and date_format(m.createDate,'%Y-%m-%d')>=#{startPayDate}
+					              ]]>  
+		   				    </if>
+		   				    <if test="endPayDate != null">
+					             <![CDATA[
+					               and date_format(m.createDate,'%Y-%m-%d')<=#{endPayDate}
+					              ]]>  
+		   				    </if>
+		   				    order by m.createDate desc
+		   				    <if test="rowNum != null">
+					             <![CDATA[
+					                 limit #{rowNum},#{pageSize}
+					              ]]>  
+		   				    </if>
+		   				    
+	             </select>
+	
+
+	
+	<select id="queryCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+	                        select 
+							  count(m.id)
+							from (
+							SELECT
+							    a.id,
+							    (select c.id from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as styleId,
+							    (select c.styleCode from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as styleCode,
+							    (select t.name from jk_student t where t.id=a.employeeId) as employeeName,
+							    a.employeeId,
+							    (select b.processName from jk_clothe_process b where b.id=a.processId) as processName,
+							    (select b.processPrice from jk_clothe_process b where b.id=a.processId) as processPrice,
+							    a.finishNum,
+							    a.createDate
+							FROM
+							    jk_process_finish a
+							WHERE
+							    1=1 
+							) m  where 1=1 
+							<if test="styleId != null">
+					             <![CDATA[
+					                and m.styleId=#{styleId}
+					              ]]>  
+		   				    </if>
+		   				    <if test="employeeId != null">
+					             <![CDATA[
+					               and m.employeeId=#{employeeId}
+					              ]]>  
+		   				    </if>
+		   				    <if test="startPayDate != null">
+					             <![CDATA[
+					               and date_format(m.createDate,'%Y-%m-%d')>=#{startPayDate}
+					              ]]>  
+		   				    </if>
+		   				     <if test="endPayDate != null">
+					             <![CDATA[
+					               and date_format(m.createDate,'%Y-%m-%d')<=#{endPayDate}
+					              ]]>  
+		   				    </if>
+	</select>
+</mapper>

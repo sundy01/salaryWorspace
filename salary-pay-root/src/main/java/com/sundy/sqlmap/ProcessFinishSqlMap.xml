@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.sundy.dao.ProcessFinishNumDao">
+
+
+	<resultMap id="processFinishNumResultMap" type="com.sundy.domain.ProcessFinishNumBean">
+		<result property="id" column="id"/>
+		<result property="processId" column="processId"/>
+	    <result property="employeeName" column="employeeName"/>
+		<result property="employeeId" column="employeeId"/>
+		<result property="finishNum" column="finishNum"/>
+	    <result property="createDate" column="createDate"/>
+	    <result property="updateDate" column="updateDate"/>
+	</resultMap>
+	
+	<!--属性-->
+	<parameterMap id="processFinishNumParameterMap" type="com.sundy.domain.ProcessFinishNumBean">
+		<parameter property="id"/>
+		<parameter property="processId"/>
+		<parameter property="employeeId"/>
+		<parameter property="finishNum"/>
+		<parameter property="createDate"/>
+		<parameter property="updateDate"/>
+	</parameterMap>
+	
+	<select id="queryProcessFinishNumBean" resultMap="processFinishNumResultMap" parameterType="java.util.Map">
+	  SELECT
+            id,
+		    processId,
+		    employeeId,
+		    (select a.name from jk_student a where a.id=employeeId) as employeeName,
+		    finishNum,
+		    createDate,
+		    updateDate
+		FROM
+		    jk_process_finish
+		where 1=1
+		      and processId=#{processId} limit #{rowNum},#{pageSize}
+	</select>
+	
+	<select id="queryCount" resultType="java.lang.Integer" parameterType="java.util.Map">
+	    select count(*) from jk_process_finish where processId=#{processId}
+    </select>
+	<!--新增-->
+	<insert id="insert" parameterMap="processFinishNumParameterMap" keyProperty="id" useGeneratedKeys="true">
+		INSERT INTO jk_process_finish (id,processId, employeeId, finishNum, createDate, updateDate) VALUES (?,?,?,?,?,?)
+	</insert>
+
+	<!--更新-->
+	<update id="update" parameterMap="processFinishNumParameterMap">
+		update jk_process_finish set
+		<trim suffixOverrides=",">
+			<if test="processId != null">
+				`processId`=#{processId},
+			</if>
+			<if test="finishNum != null">
+				`finishNum`=#{finishNum},
+			</if>
+			<if test="employeeId != null">
+				`employeeId`=#{employeeId},
+			</if>
+			<if test="updateDate != null">
+				`updateDate`=now()
+			</if>
+		</trim>
+		where `id`=#{id}
+	</update>
+
+
+	<!--删除-->
+	<delete id="delete" parameterType="java.lang.Integer">
+		delete from jk_clothe_process where `id`=#{id}
+	</delete>
+	
+</mapper>
