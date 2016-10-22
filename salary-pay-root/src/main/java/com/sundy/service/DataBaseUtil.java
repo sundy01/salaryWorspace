@@ -19,6 +19,8 @@ public class DataBaseUtil {
 	
 	private static ExportReportExcelService exportReportExcelService;
 	
+	private static LoginUserService loginUserService;
+	
 	
 	public static ApplicationContext getApplicationContext(){
 		
@@ -72,6 +74,15 @@ public class DataBaseUtil {
 			 exportReportExcelService=(ExportReportExcelService) getApplicationContext().getBean("exportReportExcelService");
 		 }
 		return exportReportExcelService;
+		
+	}
+	
+	
+	public static LoginUserService getLoginUserService(){
+		 if(loginUserService==null){
+			 loginUserService=(LoginUserService) getApplicationContext().getBean("loginUserService");
+		 }
+		return loginUserService;
 		
 	}
 	

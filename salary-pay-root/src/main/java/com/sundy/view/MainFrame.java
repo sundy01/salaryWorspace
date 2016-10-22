@@ -2,7 +2,7 @@ package com.sundy.view;
 
 import java.awt.EventQueue;
 
-import com.sundy.view.panel.MainControllerPanel;
+import com.sundy.view.panel.LoginPanel;
 
 public class MainFrame {
 
@@ -12,7 +12,7 @@ public class MainFrame {
 			//加载面板
 			EventQueue.invokeLater(new Runnable() {
 				public void run() {
-					MainControllerPanel frame = new MainControllerPanel();
+					LoginPanel panel=new LoginPanel();
 				}
 			});
 			
