@@ -40,6 +40,7 @@ public class ClotheStyleService {
 			dataRow.add(styleBean.getStyleName());
 			dataRow.add(styleBean.getStyleCode());
 			dataRow.add(styleBean.getStyleNum());
+			dataRow.add(styleBean.getMonthName());
 			dataList.add(dataRow);
 		}
 		

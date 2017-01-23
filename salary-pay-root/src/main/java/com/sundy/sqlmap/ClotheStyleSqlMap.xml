@@ -11,6 +11,7 @@
 		<result property="styleNum" column="styleNum"/>
 	    <result property="createDate" column="createDate"/>
 	    <result property="updateDate" column="updateDate"/>
+	    <result property="monthName" column="monthName"/>
 	</resultMap>
 	
 	<!--属性-->
@@ -21,6 +22,7 @@
 		<parameter property="styleNum"/>
 		<parameter property="createDate"/>
 		<parameter property="updateDate"/>
+		<parameter property="monthName"/>
 	</parameterMap>
 
     <select id="getClotheStyleBean" resultMap="clotheStyleBeanResultMap" parameterType="java.lang.Integer">
@@ -48,7 +50,7 @@
 	
 	<!--新增-->
 	<insert id="insert" parameterMap="clotheStyleBeanParameterMap" keyProperty="id" useGeneratedKeys="true">
-		INSERT INTO jk_clothe_style (id,styleName, styleCode, styleNum, createDate, updateDate) VALUES (?,?,?,?,?,?)
+		INSERT INTO jk_clothe_style (styleName, styleCode, styleNum,monthName, createDate, updateDate) VALUES (#{styleName},#{styleCode},#{styleNum},#{monthName},now(),now())
 	</insert>
 
 	<!--更新-->
@@ -63,6 +65,9 @@
 			</if>
 			<if test="styleNum != null">
 				`styleNum`=#{styleNum},
+			</if>
+			<if test="monthName != null">
+				`monthName`=#{monthName},
 			</if>
 			<if test="updateDate != null">
 				`updateDate`=now()

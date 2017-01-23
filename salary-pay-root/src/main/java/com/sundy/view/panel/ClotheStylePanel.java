@@ -77,6 +77,7 @@ public class ClotheStylePanel extends JFrame {
 			headData.add("款式名称");
 			headData.add("款式编码");
 			headData.add("款式件数");
+			headData.add("月份");
 	}
 
 	/**
@@ -560,11 +561,12 @@ public class ClotheStylePanel extends JFrame {
 			 }
 			
 			 
+			 String monthName=(String) rowData.get(4);
 			
 			 styleBean.setId(id);
 			 styleBean.setStyleName(styleName);
 			 styleBean.setStyleCode(styleCode);
-			 
+			 styleBean.setMonthName(monthName);
 			 
 			 addRowList.add(styleBean);
 				 

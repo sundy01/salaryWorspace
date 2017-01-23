@@ -16,6 +16,7 @@ import java.util.Vector;
 
 import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -44,8 +45,8 @@ import com.sundy.view.customerColumn.ComboColumn;
 import com.sundy.view.customerColumn.DateColumn;
 import com.sundy.view.customerColumn.PhoneColumn;
 
-public class EmployeeInfoPanel extends JFrame {
-	private static final Logger log=Logger.getLogger(EmployeeInfoPanel.class);
+public class DataEmployeeInfoPanel extends JFrame {
+	private static final Logger log=Logger.getLogger(DataEmployeeInfoPanel.class);
 	
 	private JPanel contentPane;
 	private JTable table;
@@ -65,7 +66,7 @@ public class EmployeeInfoPanel extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					EmployeeInfoPanel frame = new EmployeeInfoPanel();
+					DataEmployeeInfoPanel frame = new DataEmployeeInfoPanel();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -76,17 +77,17 @@ public class EmployeeInfoPanel extends JFrame {
 	
 	static{
 		    headData=new Vector<String>();
-			headData.add("编码");
-			headData.add("姓名");
-			headData.add("性别");
-			headData.add("出生日期");
-			headData.add("手机号");
+		    headData.add("编码");
+		    headData.add("姓名");
+		    for(int i=0;i<30;i++){
+		    	headData.add("第"+i+"列");
+		    }
 	}
 
 	/**
 	 * Create the frame.
 	 */
-	public EmployeeInfoPanel() {
+	public DataEmployeeInfoPanel() {
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700);
@@ -118,20 +119,16 @@ public class EmployeeInfoPanel extends JFrame {
 		table.setRowHeight(25);
 		
 		   table.getTableHeader().setReorderingAllowed(false);
+		   
+		   TableColumnModel tcm = table.getColumnModel();
+		   tcm.getColumn(0).setCellEditor(new DefaultCellEditor(new JCheckBox()));
 		
-		//设置所有的单元格都居中展现
-		this.setCellCenter(headData);
-		
-		
-		Dimension size = table.getTableHeader().getPreferredSize();
-		size.height = 35;//设置新的表头高度40
-		table.getTableHeader().setPreferredSize(size);
-		
-		//隐藏第一列
-		hideTableColumn(table,0);
 		
 		jscrollPanel.setBounds(30, 46, 943,500);
 		contentPane.add(jscrollPanel);
+		
+		
+		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		
 		String allPageMessage="共"+allNum+"条记录";
 	    allPageLabel = new JLabel(allPageMessage);
@@ -147,47 +144,12 @@ public class EmployeeInfoPanel extends JFrame {
 		
 		JButton btnNewButton = new JButton("下一页");
 		
-		btnNewButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-		         nextPageMethod();
-				
-				
-			}
-		});
 		btnNewButton.setBounds(474, 558, 93, 23);
 		contentPane.add(btnNewButton);
 		
 		JButton preButton = new JButton("上一页");
 		preButton.setBounds(334, 558, 93, 23);
 		
-		preButton.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				if(currentPageNum==1){
-					JOptionPane.showMessageDialog(null, "已经是第一页了");
-					return;
-				}
-				
-				int pageNum=currentPageNum-1;
-				currentPageNum=pageNum;
-				
-				Map<String,Object> returnMap=getDefaultTableModelByQuery(pageNum);
-				DefaultTableModel tableMode=(DefaultTableModel) returnMap.get("tableMode");
-				int allNum=(Integer) returnMap.get("allCount");
-				
-				String allPageMessage="共"+allNum+"条记录";
-				
-				String allCurrentPageMessage="当前第"+currentPageNum+"/"+totalPage+"页";
-				allPageLabel.setText(allPageMessage);
-				currentPageLabel.setText(allCurrentPageMessage);
-				
-				table.setModel(tableMode);
-				hideTableColumn(table,0);
-				setCellCenter(headData);
-				
-			}
-		});
 		
 		contentPane.add(preButton);
 		
@@ -199,78 +161,29 @@ public class EmployeeInfoPanel extends JFrame {
 		textField.setColumns(10);
 		
 		JButton btnNewButton_1 = new JButton("跳转");
-		btnNewButton_1.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				goJumpNextPage();
-			}
-		});
 		btnNewButton_1.setBounds(695, 558, 93, 23);
 		contentPane.add(btnNewButton_1);
 		
 		JButton btnNewButton_2 = new JButton("新增");
 		btnNewButton_2.setBounds(173, 614, 93, 23);
 		
-		btnNewButton_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				DefaultTableModel currentDataModel=(DefaultTableModel) table.getModel();
-				Vector rowData=new Vector();
-				currentDataModel.addRow(rowData);
-				
-			}
-		});
 		contentPane.add(btnNewButton_2);
 		
 		JButton btnNewButton_3 = new JButton("删除");
 		btnNewButton_3.setBounds(319, 614, 93, 23);
 		
-		btnNewButton_3.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				
-				deleteOpertionMethod();
-				
-			}
-		});
 		
 		contentPane.add(btnNewButton_3);
 		
 		saveButton = new JButton("保存");
 		saveButton.setBounds(502, 614, 93, 23);
 		
-		saveButton.addMouseListener(new MouseAdapter() {
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-				try{
-					saveButton.setEnabled(false);
-					saveOpertionMethod();
-					refushDataTable();
-					
-				}catch(Exception es){
-					
-					log.error(es.getMessage());
-					JOptionPane.showMessageDialog(null,es.getMessage(), "标题",JOptionPane.ERROR_MESSAGE); 
-				}finally{
-					saveButton.setEnabled(true);
-				}
-			
-				
-				
-			}
-		});
 		
 		contentPane.add(saveButton);
 		
 		JButton btnNewButton_5 = new JButton("刷新");
 		btnNewButton_5.setBounds(665, 614, 93, 23);
 		
-		btnNewButton_5.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				refushDataTable();
-			}
-		});
 		contentPane.add(btnNewButton_5);
 		
 	}
@@ -525,14 +438,7 @@ public class EmployeeInfoPanel extends JFrame {
 	}
 	
 	public Map<String,Object> getDefaultTableModelByQuery(int pageNum){
-		
-			
-		  EmployeeInfoService service=DataBaseUtil.getEmployeeInfoService();
-			
-		
-			
-			int allCount=service.queryAllRecord(null);
-			
+			int allCount=100;
 			totalPage=allCount/pageSize +1; //总共的页数
 			
 			currentPageNum=pageNum;
@@ -540,9 +446,34 @@ public class EmployeeInfoPanel extends JFrame {
 			Map<String,Object> mapParamter=new HashMap<String,Object>();
 			mapParamter.put("rowNum", rowNum);
 			mapParamter.put("pageSize",pageSize);
-			Vector dataList=service.queryStudentData(mapParamter);
+			Vector dataList=new Vector();
 			
-			DefaultTableModel tableMode=new DefaultTableModel(dataList,headData);
+			for(int j=0;j<100;j++){
+				
+				 Vector row=new Vector();
+				 row.add(j+1);
+				 row.add("test"+(j+1));
+				 for(int i=0;i<30;i++){
+					 row.add("");
+				}
+				 
+				 dataList.add(row);
+			}
+			
+			
+			DefaultTableModel tableMode=new DefaultTableModel(dataList,headData){
+
+				@Override
+				public boolean isCellEditable(int row, int column) {
+					  boolean flag=true;
+					  if(column==1 || column==2){
+						  flag=false;
+					  }
+					  
+					  return flag;
+				}
+				
+			};
 			Map<String,Object> returnMap=new HashMap<String,Object>();
 			
 			returnMap.put("tableMode", tableMode);
