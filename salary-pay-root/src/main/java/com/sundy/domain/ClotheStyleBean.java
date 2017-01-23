@@ -7,6 +7,7 @@ public class ClotheStyleBean {
 	private String styleName;
 	private String styleCode;
 	private int styleNum;
+	private String monthName;
 	private Date createDate;
 	private Date updateDate;
 	private String createDateStr;
@@ -58,6 +59,12 @@ public class ClotheStyleBean {
 	}
 	public void setUpdateDateStr(String updateDateStr) {
 		this.updateDateStr = updateDateStr;
+	}
+	public String getMonthName() {
+		return monthName;
+	}
+	public void setMonthName(String monthName) {
+		this.monthName = monthName;
 	}
 	
 	
