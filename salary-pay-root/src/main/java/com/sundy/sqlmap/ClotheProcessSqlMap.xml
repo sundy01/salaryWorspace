@@ -94,6 +94,15 @@
 		    1=1 and id=#{id}
 	</select>
 	
+		<select id="queryProcessBeanByStyleId" resultMap="processBeanResultMap" parameterType="java.lang.Integer">
+	    SELECT
+			 *
+		FROM
+		    jk_clothe_process b
+		WHERE
+		    1=1 and styleId=#{styleId}
+	</select>
+	
 	<select id="queryCount" resultType="java.lang.Integer" parameterType="java.util.Map">
 	    select count(*) from jk_clothe_process where styleId=#{styleId}
 	</select>

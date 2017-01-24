@@ -58,6 +58,8 @@ public class DataEmployeeInfoPanel extends JFrame {
 	private static int pageSize=20; //每页显示20条
 	private static Vector headData; //列头
 	private JButton saveButton; //保存
+	
+	private static int columnNum=10;
 
 	/**
 	 * Launch the application.
@@ -79,7 +81,7 @@ public class DataEmployeeInfoPanel extends JFrame {
 		    headData=new Vector<String>();
 		    headData.add("编码");
 		    headData.add("姓名");
-		    for(int i=0;i<30;i++){
+		    for(int i=0;i<columnNum;i++){
 		    	headData.add("第"+i+"列");
 		    }
 	}
@@ -453,7 +455,7 @@ public class DataEmployeeInfoPanel extends JFrame {
 				 Vector row=new Vector();
 				 row.add(j+1);
 				 row.add("test"+(j+1));
-				 for(int i=0;i<30;i++){
+				 for(int i=0;i<columnNum;i++){
 					 row.add("");
 				}
 				 

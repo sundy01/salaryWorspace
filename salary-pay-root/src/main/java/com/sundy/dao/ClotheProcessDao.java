@@ -29,4 +29,7 @@ public interface ClotheProcessDao {
 	
 	public void deleteUserFinishNum(Integer id);
 	
+	
+	public List<ProcessBean> queryProcessBeanByStyleId(Integer styleId);
+	
 }

@@ -1,8 +1,10 @@
 package com.sundy.view.panel;
 
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.KeyStroke;
 
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -32,6 +34,8 @@ public class LoginPanel extends JFrame {
 	public LoginPanel() {
 		getContentPane().setLayout(null);
 		
+		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		JLabel label = new JLabel("账号:");
 		label.setHorizontalAlignment(SwingConstants.CENTER);
 		label.setFont(new Font("宋体", Font.PLAIN, 15));
@@ -56,6 +60,17 @@ public class LoginPanel extends JFrame {
 		loginButton = new JButton("登录");
 		loginButton.setBounds(191, 310, 93, 23);
 		loginButton.setMnemonic(java.awt.event.KeyEvent.VK_ENTER);
+		
+		loginButton.registerKeyboardAction(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				saveButtonEvent();
+			}
+		},
+			      KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0),
+			        JComponent.WHEN_IN_FOCUSED_WINDOW);
+		
 		getContentPane().add(loginButton);
 		
 		loginButton.addMouseListener(new MouseAdapter() {
@@ -75,13 +90,6 @@ public class LoginPanel extends JFrame {
 			}
 		});
 		
-		loginButton.addActionListener(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				saveButtonEvent();
-			}
-		});
 		
 		JButton cancelButton = new JButton("取消");
 		cancelButton.setBounds(404, 310, 93, 23);
@@ -126,8 +134,7 @@ public class LoginPanel extends JFrame {
 				
 				mainFrame = new MainControllerPanel();
 				mainFrame.setVisible(true);
-				
-				this.setVisible(false);
+				this.dispose();
 				
 			}else{
 				JOptionPane.showMessageDialog(null,"密码输入错误!!");

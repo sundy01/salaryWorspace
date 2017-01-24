@@ -31,11 +31,21 @@
 
 	<select id="queryClotheStyleBean" resultMap="clotheStyleBeanResultMap" parameterType="java.util.Map">
 	    select * from jk_clothe_style where 1=1 
-	      <if test="styleName != null">
+	     <if test="styleName != null">
 	             <![CDATA[
 	                 and styleName like '%${styleName}%'
 	              ]]>  
-		   </if>
+		 </if>
+		  <if test="styleCode != null">
+	             <![CDATA[
+	                 and styleCode like '%${styleCode}%'
+	              ]]>  
+		 </if>
+		  <if test="monthName != null">
+	             <![CDATA[
+	                 and monthName=#{monthName}
+	              ]]>  
+		 </if>
 	      limit #{rowNum},#{pageSize}
 	</select>
 	
@@ -44,6 +54,16 @@
 	    <if test="styleName != null">
 	             <![CDATA[
 	                 and styleName like '%${styleName}%'
+	              ]]>  
+		 </if>
+		  <if test="styleCode != null">
+	             <![CDATA[
+	                 and styleCode like '%${styleCode}%'
+	              ]]>  
+		 </if>
+		  <if test="monthName != null">
+	             <![CDATA[
+	                 and monthName=#{monthName}
 	              ]]>  
 		 </if>
 	</select>

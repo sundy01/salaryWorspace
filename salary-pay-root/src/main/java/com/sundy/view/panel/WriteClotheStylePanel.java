@@ -3,22 +3,21 @@ package com.sundy.view.panel;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import javax.swing.DefaultCellEditor;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -28,6 +27,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
+import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
@@ -35,20 +35,18 @@ import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
 import org.apache.log4j.Logger;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.util.StringUtils;
 
-import com.sundy.domain.Item;
-import com.sundy.domain.Student;
+import com.sundy.domain.ClotheStyleBean;
+import com.sundy.domain.ProcessBean;
+import com.sundy.service.ClotheProcessService;
+import com.sundy.service.ClotheStyleService;
 import com.sundy.service.DataBaseUtil;
-import com.sundy.service.EmployeeInfoService;
-import com.sundy.view.comboRender.ItemRenderer;
-import com.sundy.view.comboRender.KeyValComboBox;
-import com.sundy.view.customerColumn.ComboColumn;
-import com.sundy.view.customerColumn.DateColumn;
-import com.sundy.view.customerColumn.PhoneColumn;
+import com.sundy.view.customerColumn.NumberColumn;
 
-public class EmployeeInfoPanel extends JFrame {
-	private static final Logger log=Logger.getLogger(EmployeeInfoPanel.class);
+public class WriteClotheStylePanel extends JFrame {
+	private static final Logger log=Logger.getLogger(WriteClotheStylePanel.class);
 	
 	private JPanel contentPane;
 	private JTable table;
@@ -59,7 +57,9 @@ public class EmployeeInfoPanel extends JFrame {
 	private JLabel currentPageLabel; //当前第几页
 	private static int pageSize=20; //每页显示20条
 	private static Vector headData; //列头
-	private JButton saveButton; //保存
+	private JTextField queryStyleField;
+	private JTextField styleCodeField;
+	private JTextField styleMonthNameField;
 
 	/**
 	 * Launch the application.
@@ -68,7 +68,7 @@ public class EmployeeInfoPanel extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					EmployeeInfoPanel frame = new EmployeeInfoPanel();
+					WriteClotheStylePanel frame = new WriteClotheStylePanel();
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -80,16 +80,17 @@ public class EmployeeInfoPanel extends JFrame {
 	static{
 		    headData=new Vector<String>();
 			headData.add("编码");
-			headData.add("姓名");
-			headData.add("性别");
-			headData.add("出生日期");
-			headData.add("手机号");
+			headData.add("款式名称");
+			headData.add("款式编码");
+			headData.add("款式件数");
+			headData.add("月份");
 	}
 
 	/**
 	 * Create the frame.
 	 */
-	public EmployeeInfoPanel() {
+	public WriteClotheStylePanel() {
+		log.info("构建款面板");
 		setResizable(false);
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1000, 700);
@@ -98,11 +99,47 @@ public class EmployeeInfoPanel extends JFrame {
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 		
-		JLabel label = new JLabel("员工信息");
-		label.setHorizontalAlignment(SwingConstants.CENTER);
-		label.setFont(new Font("宋体", Font.PLAIN, 18));
-		label.setBounds(455, 10, 104, 26);
+		
+		queryStyleField = new JTextField();
+		queryStyleField.setBounds(201, 19, 119, 21);
+		contentPane.add(queryStyleField);
+		queryStyleField.setColumns(10);
+		
+		
+		
+		
+		
+		JLabel label = new JLabel("款式编码:");
+		label.setBounds(339, 22, 77, 15);
 		contentPane.add(label);
+		
+		styleCodeField = new JTextField();
+		styleCodeField.setBounds(426, 19, 93, 21);
+		contentPane.add(styleCodeField);
+		styleCodeField.setColumns(10);
+		
+		JLabel label_1 = new JLabel("月份:");
+		label_1.setBounds(541, 22, 40, 15);
+		contentPane.add(label_1);
+		
+		styleMonthNameField = new JTextField();
+		styleMonthNameField.setBounds(598, 19, 81, 21);
+		contentPane.add(styleMonthNameField);
+		
+		
+		
+		JButton btnNewButton_6 = new JButton("查询");
+		btnNewButton_6.setBounds(711, 18, 93, 23);
+		
+		btnNewButton_6.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				queryStyleData();
+			}
+		});
+		contentPane.add(btnNewButton_6);
+		
 		
 		
 		    
@@ -120,10 +157,22 @@ public class EmployeeInfoPanel extends JFrame {
 		
 		table.setRowHeight(25);
 		
-		   table.getTableHeader().setReorderingAllowed(false);
-		
 		//设置所有的单元格都居中展现
 		this.setCellCenter(headData);
+		
+		
+		//处理双击单元格事件
+		this.table.addMouseListener(new MouseAdapter() {
+			
+			 
+			@Override
+			public void mousePressed(MouseEvent e) {
+				super.mousePressed(e);
+				if (e.getButton() == MouseEvent.BUTTON3) {
+					rowDoubleClickChange();
+				}
+			}
+		});
 		
 		
 		Dimension size = table.getTableHeader().getPreferredSize();
@@ -133,19 +182,19 @@ public class EmployeeInfoPanel extends JFrame {
 		//隐藏第一列
 		hideTableColumn(table,0);
 		
-		jscrollPanel.setBounds(30, 46, 943,500);
+		jscrollPanel.setBounds(10, 77, 974,496);
 		contentPane.add(jscrollPanel);
 		
 		String allPageMessage="共"+allNum+"条记录";
 	    allPageLabel = new JLabel(allPageMessage);
 		allPageLabel.setFont(new Font("宋体", Font.PLAIN, 14));
-		allPageLabel.setBounds(40, 556, 75, 26);
+		allPageLabel.setBounds(36, 583, 93, 26);
 		contentPane.add(allPageLabel);
 		
 		String allCurrentPageMessage="当前第"+currentPageNum+"/"+totalPage+"页";
 	    currentPageLabel = new JLabel(allCurrentPageMessage);
 	    currentPageLabel.setFont(new Font("宋体", Font.PLAIN, 14));
-	    currentPageLabel.setBounds(189, 562, 94, 15);
+	    currentPageLabel.setBounds(163, 589, 94, 15);
 		contentPane.add(currentPageLabel);
 		
 		JButton btnNewButton = new JButton("下一页");
@@ -158,11 +207,11 @@ public class EmployeeInfoPanel extends JFrame {
 				
 			}
 		});
-		btnNewButton.setBounds(474, 558, 93, 23);
+		btnNewButton.setBounds(443, 585, 93, 23);
 		contentPane.add(btnNewButton);
 		
 		JButton preButton = new JButton("上一页");
-		preButton.setBounds(334, 558, 93, 23);
+		preButton.setBounds(295, 585, 93, 23);
 		
 		preButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -197,7 +246,7 @@ public class EmployeeInfoPanel extends JFrame {
 		
 		
 		textField = new JTextField();
-		textField.setBounds(609, 559, 49, 21);
+		textField.setBounds(598, 586, 49, 21);
 		contentPane.add(textField);
 		textField.setColumns(10);
 		
@@ -207,87 +256,11 @@ public class EmployeeInfoPanel extends JFrame {
 				goJumpNextPage();
 			}
 		});
-		btnNewButton_1.setBounds(695, 558, 93, 23);
+		btnNewButton_1.setBounds(689, 585, 93, 23);
 		contentPane.add(btnNewButton_1);
 		
-		JButton btnNewButton_2 = new JButton("新增");
-		btnNewButton_2.setBounds(173, 614, 93, 23);
-		
-		btnNewButton_2.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				
-				DefaultTableModel currentDataModel=(DefaultTableModel) table.getModel();
-				Vector rowData=new Vector();
-				currentDataModel.addRow(rowData);
-				
-			}
-		});
-		contentPane.add(btnNewButton_2);
-		
-		JButton btnNewButton_3 = new JButton("删除");
-		btnNewButton_3.setBounds(319, 614, 93, 23);
-		
-		btnNewButton_3.addActionListener(new ActionListener() {
-			
-			public void actionPerformed(ActionEvent e) {
-				
-				deleteOpertionMethod();
-				
-			}
-		});
-		
-		contentPane.add(btnNewButton_3);
-		
-		saveButton = new JButton("保存");
-		saveButton.setBounds(502, 614, 93, 23);
-		
-		saveButton.addMouseListener(new MouseAdapter() {
-			
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				
-				try{
-					saveButton.setEnabled(false);
-					saveOpertionMethod();
-					refushDataTable();
-					
-				}catch(Exception es){
-					
-					log.error(es.getMessage());
-					JOptionPane.showMessageDialog(null,es.getMessage(), "标题",JOptionPane.ERROR_MESSAGE); 
-				}finally{
-					saveButton.setEnabled(true);
-				}
-			
-				
-				
-			}
-		});
-		
-		contentPane.add(saveButton);
-		
-		//注册快捷键ctrl+s
-		 this.saveButton.registerKeyboardAction(new ActionListener() {
-			
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				try{
-					saveOpertionMethod();
-					refushDataTable();
-				}catch(Exception es){
-					
-					log.error(es.getMessage());
-					JOptionPane.showMessageDialog(null,es.getMessage(), "标题",JOptionPane.ERROR_MESSAGE); 
-				}finally{
-					saveButton.setEnabled(true);
-				}
-				
-			}
-		}, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW); 
-		
 		JButton btnNewButton_5 = new JButton("刷新");
-		btnNewButton_5.setBounds(665, 614, 93, 23);
+		btnNewButton_5.setBounds(814, 585, 93, 23);
 		
 		btnNewButton_5.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -296,8 +269,51 @@ public class EmployeeInfoPanel extends JFrame {
 		});
 		contentPane.add(btnNewButton_5);
 		
+		JLabel lblNewLabel = new JLabel("款式名称:");
+		lblNewLabel.setFont(new Font("宋体", Font.PLAIN, 12));
+		lblNewLabel.setBounds(125, 22, 66, 15);
+		contentPane.add(lblNewLabel);
+		
+		JButton resetData = new JButton("重置");
+		resetData.setBounds(829, 18, 93, 23);
+		resetData.addActionListener(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				queryStyleField.setText("");
+			}
+		});
+		
+		contentPane.add(resetData);
+		
+	
+		
+		
 	}
 	
+	/**
+	 * 查询款式信息数据
+	 */
+	private void queryStyleData() {
+      
+		Map<String,Object> returnMap=getDefaultTableModelByQuery(1);
+		
+		DefaultTableModel tableMode=(DefaultTableModel) returnMap.get("tableMode");
+		int allNum=(Integer) returnMap.get("allCount");
+		
+		String allPageMessage="共"+allNum+"条记录";	
+		
+		String allCurrentPageMessage="当前第"+currentPageNum+"/"+totalPage+"页";
+		
+		allPageLabel.setText(allPageMessage);
+		currentPageLabel.setText(allCurrentPageMessage);
+		
+		table.setModel(tableMode);
+		hideTableColumn(table,0);
+		setCellCenter(headData);
+		
+	}
+
 	/**
 	 * 跳转到某一页
 	 */
@@ -350,42 +366,6 @@ public class EmployeeInfoPanel extends JFrame {
 		
 	}
 	
-	/**
-	 * 删除操作
-	 */
-	private void deleteOpertionMethod(){
-		
-		int[] selectRows=table.getSelectedRows();
-		
-		if(selectRows.length>0){
-			int result=JOptionPane.showConfirmDialog(null,"确定要删除吗?");
-			if(result==JOptionPane.OK_OPTION){
-				EmployeeInfoService service=DataBaseUtil.getEmployeeInfoService();
-				boolean flag=service.deleteRowData(table, selectRows);
-				if(flag){
-					refushDataTable();
-				}
-			}
-			
-		}else{
-			JOptionPane.showMessageDialog(null,"请选择要删除的记录!");
-		}
-		
-	}
-	
-	/**
-	 * 保存操作
-	 */
-	private void saveOpertionMethod() throws Exception{
-		
-		  List<Student> addStudentRow=getAddRow(); //新增的记录
-		 
-		  if(addStudentRow!=null && addStudentRow.size()>0){
-			  
-			   EmployeeInfoService service=DataBaseUtil.getEmployeeInfoService();
-			    service.saveOrUpdateStudent(addStudentRow);
-		  }
-	}
 	
 	/**
 	 * 下一页操作
@@ -425,62 +405,17 @@ public class EmployeeInfoPanel extends JFrame {
 	     DefaultTableCellRenderer render = new DefaultTableCellRenderer();
 	     render.setHorizontalAlignment(SwingConstants.CENTER);
 	     
+	     //设置表头不能拖放
 	     table.getTableHeader().setReorderingAllowed(false);
-	     
-	      
-	        
-	        Vector<Item> comboBoxMode=new Vector<Item>();
-	        Item item1=new Item();
-	        item1.setKey("F");
-	        item1.setValue("女");
-	        
-	        Item item2=new Item();
-		        item2.setKey("M");
-		        item2.setValue("男");
-	        
-	        comboBoxMode.add(item1);
-	        comboBoxMode.add(item2);
-	        
 	     
 	     for(String headName : headData){
 	    	   table.getColumn(headName).setCellRenderer(render);
 	    	  
-	    	   if(headName.equals("性别")){
-	    		   
-	    		   ComboColumn column=new ComboColumn(comboBoxMode);
-	    		      table.getColumn(headName).setCellEditor(column);
-		    		  table.getColumn(headName).setCellRenderer(column);
-	    	   }
-	    	  if(headName.equals("出生日期")){
-	    		  DateColumn dateColumn=new DateColumn();
-	    		  table.getColumn(headName).setCellEditor(dateColumn);
-	    		  table.getColumn(headName).setCellRenderer(dateColumn);
+	    	  if(headName.equals("款式件数")){
+	    		  NumberColumn numberColumn=new NumberColumn();
+	    		  table.getColumn(headName).setCellEditor(numberColumn);
+	    		  table.getColumn(headName).setCellRenderer(numberColumn);
 	    	  }
-	    	  if(headName.equals("手机号")){
-	    		  
-	    		  PhoneColumn phoneColumn=new PhoneColumn();
-	    		  table.getColumn(headName).setCellEditor(phoneColumn);
-	    		  table.getColumn(headName).setCellRenderer(phoneColumn);
-	    	  }
-	    	  
-	    	 /* if(headName.equals("操作")){
-	    		   DeleteButtonColumn buttonColumn=new DeleteButtonColumn();
-	    		   table.getColumn(headName).setCellEditor(buttonColumn);
-	    		   table.getColumn(headName).setCellRenderer(buttonColumn);
-	    		   
-	    	   }
-	    	   
-	    	  if(headName.equals("是否选择")){
-	    		  CheckBoxColumn checkBoxColumn=new CheckBoxColumn();
-	    		  table.getColumn(headName).setCellEditor(checkBoxColumn);
-	    		   table.getColumn(headName).setCellRenderer(checkBoxColumn);
-	    	  }
-	    	  
-	    	  if(headName.equals("价格")){
-	    		  MoneyColumn moneyColumn=new MoneyColumn();
-	    		  table.getColumn(headName).setCellEditor(moneyColumn);
-	    		  table.getColumn(headName).setCellRenderer(moneyColumn);
-	    	  }*/
 	    	  
 	    	  
 	     }
@@ -509,52 +444,83 @@ public class EmployeeInfoPanel extends JFrame {
 		setCellCenter(headData);
 	}
 	
+	
+	
 	/**
-	 * 获取新增的记录
-	 * @return
-	 * @throws Exception 
+	 * 双击表格行
 	 */
-	private List<Student> getAddRow() throws Exception{
+	private void rowDoubleClickChange(){
+		int row=this.table.getSelectedRow();
+		if(row==-1){
+			return;
+		}
+		Integer id=(Integer) this.table.getValueAt(row,0);
 		
-		DefaultTableModel currentDataModel=(DefaultTableModel) table.getModel();
-		Vector<Vector> allData=currentDataModel.getDataVector();
-		
-		List<Student> addRowList=new ArrayList<Student>();
-		
-		for(Vector rowData : allData){
-			  Integer id=(Integer) rowData.get(0);
-			 String name=(String) rowData.get(1);
-			 String gender=(String) rowData.get(2);
-			 
-			 String birthday=(String) rowData.get(3);
-			 String phone=(String) rowData.get(4);
-			 
-			 if(!StringUtils.hasText(name)){
-				   throw new Exception("新增的姓名不能为空!");
+		if(id!=null && id.intValue()!=0){
+			
+			
+			JDialog childDialog=new JDialog(this,"录入信息",true);
+			childDialog.setBounds(20,40,1010, 705);
+			childDialog.setModal(true);
+			
+			ClotheProcessService processService=DataBaseUtil.getClotheProcessService();
+			List<ProcessBean> processHeadData=processService.getProcessDataByStyleId(id);
+			
+			 if(processHeadData==null || processHeadData.size()==0){
+				 JOptionPane.showMessageDialog(null, "当前款式未输入工序信息");
+				 return;
 			 }
-			 
-			 Student student=new Student();
-			 student.setId(id);
-			 student.setName(name);
-			 student.setBirthday(birthday);
-			 student.setGender(gender);
-			 student.setPhone(phone);
-			 student.setCreateTime(new Date());
-			 addRowList.add(student);
-				 
+			
+			WriteFinishClotheNumberPanel processPanel=new WriteFinishClotheNumberPanel(id);
+			childDialog.getContentPane().add(processPanel.getComponent(0));
+			childDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);  
+		
+			
+			
+			int windowWidth = this.getWidth(); //获得窗口宽
+
+			int windowHeight = this.getHeight(); //获得窗口高
+
+			Toolkit kit = Toolkit.getDefaultToolkit(); //定义工具包
+
+			Dimension screenSize = kit.getScreenSize(); //获取屏幕的尺寸
+
+			int screenWidth = screenSize.width; //获取屏幕的宽
+
+			int screenHeight = screenSize.height; //获取屏幕的高
+
+			childDialog.setLocation(screenWidth / 2 - windowWidth / 2, screenHeight / 2 - windowHeight / 2);
+			childDialog.setResizable(false);
+			childDialog.setVisible(true);
+			
 		}
 		
-		return addRowList;
+		
 	}
 	
 	public Map<String,Object> getDefaultTableModelByQuery(int pageNum){
 		
 			
-		  EmployeeInfoService service=DataBaseUtil.getEmployeeInfoService();
+		 ClotheStyleService service=DataBaseUtil.getClotheStyleService();
 			
 		
+		    String queryStyleName=this.queryStyleField.getText();
+		    String styleCode=this.styleCodeField.getText();
+		    String monthName=this.styleMonthNameField.getText();
+		    
+		    Map<String,Object> queryParameter=new HashMap<String,Object>();
+		    
+		    if(StringUtils.hasText(queryStyleName)){
+		    	queryParameter.put("styleName", queryStyleName);
+		    }
+		    if(StringUtils.hasText(styleCode)){
+		    	queryParameter.put("styleCode", styleCode);
+		    }
+		    if(StringUtils.hasText(monthName)){
+		    	queryParameter.put("monthName", monthName);
+		    }
 			
-			int allCount=service.queryAllRecord(null);
+			int allCount=service.queryAllRecord(queryParameter);
 			
 			totalPage=allCount/pageSize +1; //总共的页数
 			
@@ -563,9 +529,27 @@ public class EmployeeInfoPanel extends JFrame {
 			Map<String,Object> mapParamter=new HashMap<String,Object>();
 			mapParamter.put("rowNum", rowNum);
 			mapParamter.put("pageSize",pageSize);
-			Vector dataList=service.queryStudentData(mapParamter);
 			
-			DefaultTableModel tableMode=new DefaultTableModel(dataList,headData);
+			if(StringUtils.hasText(queryStyleName)){
+				mapParamter.put("styleName",queryStyleName);
+			}
+			 if(StringUtils.hasText(styleCode)){
+				 mapParamter.put("styleCode", styleCode);
+			    }
+		    if(StringUtils.hasText(monthName)){
+		    	mapParamter.put("monthName", monthName);
+		    }
+			
+			Vector dataList=service.queryClotheStyleData(mapParamter);
+			
+			DefaultTableModel tableMode=new DefaultTableModel(dataList,headData){
+
+				@Override
+				public boolean isCellEditable(int row, int column) {
+					return false;
+				}
+				
+			};
 			Map<String,Object> returnMap=new HashMap<String,Object>();
 			
 			returnMap.put("tableMode", tableMode);

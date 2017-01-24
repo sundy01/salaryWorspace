@@ -28,6 +28,12 @@ public class ClotheProcessService {
 		return this.clotheProcessDao.getProcessBeanById(id);
 	}
 	
+	public List<ProcessBean> getProcessDataByStyleId(Integer styleId){
+		List<ProcessBean> list=this.clotheProcessDao.queryProcessBeanByStyleId(styleId);
+		
+		return list;
+	}
+	
 	
 	public Vector queryClotheProcessDataByStyleCode(String styleCode){
       
