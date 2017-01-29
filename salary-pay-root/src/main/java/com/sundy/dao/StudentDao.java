@@ -21,4 +21,5 @@ public interface StudentDao {
 	public List<Student> loadAllStudent();
 	
 	public void deleteFinishNumById(Integer userId);
+	
 }

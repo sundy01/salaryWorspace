@@ -1,23 +1,15 @@
 package com.sundy.view.panel;
 
-import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -25,25 +17,18 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
-import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
-import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableColumnModel;
 
 import org.apache.log4j.Logger;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.util.StringUtils;
 
-import com.sundy.domain.ClotheStyleBean;
 import com.sundy.domain.ProcessBean;
 import com.sundy.service.ClotheProcessService;
-import com.sundy.service.ClotheStyleService;
 import com.sundy.service.DataBaseUtil;
-import com.sundy.view.customerColumn.NumberColumn;
+import com.sundy.service.EmployeeInfoService;
 
 public class WriteFinishClotheNumberPanel extends JFrame {
 	private static final Logger log=Logger.getLogger(WriteFinishClotheNumberPanel.class);
@@ -51,19 +36,20 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 	private JPanel contentPane;
 	private JTable table;
 	private JTextField textField;
+	private JButton saveButton;
 	private static int currentPageNum=1; //当前第几页
 	private static int totalPage; //总共多少页
 	private JLabel allPageLabel; //共多少页
 	private JLabel currentPageLabel; //当前第几页
-	private static int pageSize=200; //每页显示20条
+	private static int pageSize=800; //每页显示20条
 	private Vector headData; //列头
-    private int headNumer=10;
+    private int headNumer=15;
 	private Integer styelId; //款式id
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					WriteFinishClotheNumberPanel frame = new WriteFinishClotheNumberPanel(1);
+					WriteFinishClotheNumberPanel frame = new WriteFinishClotheNumberPanel(71);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -80,6 +66,7 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 		//构建表头数据
 		ClotheProcessService processService=DataBaseUtil.getClotheProcessService();
 		headData=new Vector();
+		headData.add("序号");
 		headData.add("员工编码");
 		headData.add("员工姓名");
 		List<ProcessBean> processHeadData=processService.getProcessDataByStyleId(styleId);
@@ -124,20 +111,6 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 		}
 		//设置所有的单元格都居中展现
 		this.setCellCenter(headData);
-		
-		
-		//处理双击单元格事件
-		this.table.addMouseListener(new MouseAdapter() {
-			
-			 
-			@Override
-			public void mousePressed(MouseEvent e) {
-				super.mousePressed(e);
-				if (e.getButton() == MouseEvent.BUTTON3) {
-					rowDoubleClickChange();
-				}
-			}
-		});
 		
 		
 		jscrollPanel.setBounds(10, 10, 974,563);
@@ -217,7 +190,7 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 		contentPane.add(btnNewButton_1);
 		
 		JButton btnNewButton_5 = new JButton("刷新");
-		btnNewButton_5.setBounds(814, 585, 93, 23);
+		btnNewButton_5.setBounds(792, 585, 93, 23);
 		
 		btnNewButton_5.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -225,6 +198,14 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 			}
 		});
 		contentPane.add(btnNewButton_5);
+		
+		saveButton = new JButton("保存");
+		saveButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			}
+		});
+		saveButton.setBounds(891, 585, 93, 23);
+		contentPane.add(saveButton);
 		
 	
 		
@@ -344,49 +325,7 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 	
 	
 	
-	/**
-	 * 双击表格行
-	 */
-	private void rowDoubleClickChange(){
-		int row=this.table.getSelectedRow();
-		if(row==-1){
-			return;
-		}
-		Integer id=(Integer) this.table.getValueAt(row,0);
-		
-		if(id!=null && id.intValue()!=0){
-			
-			
-			JDialog childDialog=new JDialog(this,"工序信息",true);
-			childDialog.setBounds(20,40,1010, 705);
-			childDialog.setModal(true);
-			
-			ClotheProcessPanel processPanel=new ClotheProcessPanel(id);
-			childDialog.getContentPane().add(processPanel.getComponent(0));
-			childDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);  
-		
-			
-			
-			int windowWidth = this.getWidth(); //获得窗口宽
-
-			int windowHeight = this.getHeight(); //获得窗口高
-
-			Toolkit kit = Toolkit.getDefaultToolkit(); //定义工具包
-
-			Dimension screenSize = kit.getScreenSize(); //获取屏幕的尺寸
-
-			int screenWidth = screenSize.width; //获取屏幕的宽
-
-			int screenHeight = screenSize.height; //获取屏幕的高
-
-			childDialog.setLocation(screenWidth / 2 - windowWidth / 2, screenHeight / 2 - windowHeight / 2);
-			
-			childDialog.setVisible(true);
-			
-		}
-		
-		
-	}
+	
 	
 	public Map<String,Object> getDefaultTableModelByQuery(int pageNum){
 		
@@ -394,8 +333,9 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 		    
 		    Map<String,Object> queryParameter=new HashMap<String,Object>();
 		    
+		    EmployeeInfoService employeeService=DataBaseUtil.getEmployeeInfoService();
 			
-			int allCount=0;
+			int allCount=employeeService.queryAllRecord(queryParameter);
 			
 			totalPage=allCount/pageSize +1; //总共的页数
 			
@@ -423,7 +363,11 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 
 				@Override
 				public boolean isCellEditable(int row, int column) {
-					return false;
+					boolean flag=true;
+					if(column==0 || column==1 || column==2){
+						flag=false;
+					}
+					return flag;
 				}
 				
 			};
@@ -435,5 +379,4 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 			
 			 return returnMap;
 	}
-	
 }

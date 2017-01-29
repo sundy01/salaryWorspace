@@ -15,7 +15,7 @@ public class MainControllerPanel extends JFrame {
 		EmployeeInfoPanel employeeInfoPanel=new EmployeeInfoPanel();
 		ClotheStylePanel clotheStylePanel=new ClotheStylePanel();
 		
-	    EmployeeFinishClothePanel finishPanel=new EmployeeFinishClothePanel();
+		WriteClotheStylePanel finishPanel=new WriteClotheStylePanel();
 		
 		PayMoneyPanel payMoneyPanel=new PayMoneyPanel();
 		

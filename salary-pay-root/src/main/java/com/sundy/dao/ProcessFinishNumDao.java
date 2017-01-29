@@ -18,4 +18,6 @@ public interface ProcessFinishNumDao {
 	
 	public void delete(Integer id);
 	
+	public List<ProcessFinishNumBean> getProcessFinishNumBeanByMap(Map<String,Object> map);
+	
 }

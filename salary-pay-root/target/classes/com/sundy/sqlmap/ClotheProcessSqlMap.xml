@@ -100,7 +100,7 @@
 		FROM
 		    jk_clothe_process b
 		WHERE
-		    1=1 and styleId=#{styleId}
+		    1=1 and styleId=#{styleId} order by id
 	</select>
 	
 	<select id="queryCount" resultType="java.lang.Integer" parameterType="java.util.Map">

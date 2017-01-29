@@ -24,6 +24,18 @@
 		<parameter property="updateDate"/>
 	</parameterMap>
 	
+	<select id="getProcessFinishNumBeanByMap" resultMap="processFinishNumResultMap" parameterType="java.util.Map">
+	    SELECT
+		    a.*
+		FROM
+		    jk_process_finish a,
+		    jk_clothe_process b
+		WHERE
+		    a.processId=b.id
+		AND b.styleId=#{styleId}
+		AND a.employeeId=#{employeeId}
+	</select>
+	
 	<select id="queryProcessFinishNumBean" resultMap="processFinishNumResultMap" parameterType="java.util.Map">
 	  SELECT
             id,
