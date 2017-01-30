@@ -22,6 +22,7 @@
 							m.id,
 							m.styleCode,
 							m.styleId,
+							m.monthName,
 							m.employeeName,
 							m.employeeId,
 							m.processName,
@@ -33,6 +34,7 @@
 							SELECT
 							    a.id,
 							    (select c.id from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as styleId,
+							    (select c.monthName from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as monthName,
 							    (select c.styleCode from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as styleCode,
 							    (select t.name from jk_student t where t.id=a.employeeId) as employeeName,
 							    a.employeeId,
@@ -49,6 +51,11 @@
 							<if test="styleCode != null">
 					             <![CDATA[
 					                and m.styleCode like '%${styleCode}%'
+					              ]]>  
+		   				    </if>
+		   				    <if test="monthName != null">
+					             <![CDATA[
+					                and m.monthName=#{monthName}
 					              ]]>  
 		   				    </if>
 		   				    <if test="employeeId != null">
@@ -84,6 +91,7 @@
 							SELECT
 							    a.id,
 							    (select c.id from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as styleId,
+							    (select c.monthName from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as monthName,
 							    (select c.styleCode from jk_clothe_process b,jk_clothe_style c where b.styleId=c.id and b.id=a.processId) as styleCode,
 							    (select t.name from jk_student t where t.id=a.employeeId) as employeeName,
 							    a.employeeId,
@@ -100,6 +108,11 @@
 							<if test="styleId != null">
 					             <![CDATA[
 					                and m.styleId=#{styleId}
+					              ]]>  
+		   				    </if>
+		   				     <if test="monthName != null">
+					             <![CDATA[
+					                and m.monthName=#{monthName}
 					              ]]>  
 		   				    </if>
 		   				    <if test="employeeId != null">

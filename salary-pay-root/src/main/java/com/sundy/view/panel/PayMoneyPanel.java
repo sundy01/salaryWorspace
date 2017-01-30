@@ -45,6 +45,7 @@ import org.springframework.util.StringUtils;
 
 import com.sundy.domain.ClotheStyleBean;
 import com.sundy.domain.ProcessBean;
+import com.sundy.domain.Student;
 import com.sundy.domain.StyleItem;
 import com.sundy.service.ClotheProcessService;
 import com.sundy.service.ClotheStyleService;
@@ -59,6 +60,8 @@ import com.sundy.view.customerColumn.DatePickPanel;
 import com.sundy.view.customerColumn.MoneyColumn;
 import com.sundy.view.customerColumn.NumberColumn;
 import com.sundy.view.customerColumn.StyleComboColumn;
+
+import javax.swing.DefaultComboBoxModel;
 
 public class PayMoneyPanel extends JFrame {
 	private static final Logger log=Logger.getLogger(PayMoneyPanel.class);
@@ -77,6 +80,7 @@ public class PayMoneyPanel extends JFrame {
 	private DatePickPanel startDateTextField;
 	private DatePickPanel endDateTextField;
 	private JLabel sumMoney;
+	private JComboBox selectMonthField;
 
 	/**
 	 * Launch the application.
@@ -139,6 +143,13 @@ public class PayMoneyPanel extends JFrame {
 		sumMoney.setBounds(690, 75, 300, 23);
 		contentPane.add(sumMoney);
 		
+		
+		    selectMonthField = new JComboBox();
+			selectMonthField.setModel(new DefaultComboBoxModel(new String[] {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"}));
+			selectMonthField.setBounds(898, 26, 54, 21);
+			contentPane.add(selectMonthField);
+		
+		
 		//设置员工下拉框
 		EmployeeInfoService employeeService=DataBaseUtil.getEmployeeInfoService();
 		Vector<StyleItem> employeeComboxData=employeeService.queryAllStudentConvertItem();
@@ -155,15 +166,15 @@ public class PayMoneyPanel extends JFrame {
 		contentPane.add(lblNewLabel);
 		
 		startDateTextField = new DatePickPanel();
-		startDateTextField.setBounds(599, 26, 100, 21);
+		startDateTextField.setBounds(585, 26, 100, 21);
 		contentPane.add(startDateTextField);
 		
 		JLabel lblNewLabel_1 = new JLabel("日期到:");
-		lblNewLabel_1.setBounds(718, 29, 54, 15);
+		lblNewLabel_1.setBounds(695, 29, 54, 15);
 		contentPane.add(lblNewLabel_1);
 		
 		endDateTextField = new DatePickPanel();
-		endDateTextField.setBounds(782, 26, 100, 21);
+		endDateTextField.setBounds(747, 23, 100, 21);
 		contentPane.add(endDateTextField);
 		
 		JButton btnNewButton_2 = new JButton("查询");
@@ -293,6 +304,12 @@ public class PayMoneyPanel extends JFrame {
 		lblNewLabel_2.setBounds(614, 79, 63, 15);
 		contentPane.add(lblNewLabel_2);
 		
+		JLabel lblNewLabel_3 = new JLabel("月份");
+		lblNewLabel_3.setBounds(864, 29, 40, 15);
+		contentPane.add(lblNewLabel_3);
+		
+	   
+		
 	
 		
 		reflashButton.addActionListener(new ActionListener() {
@@ -316,9 +333,9 @@ public class PayMoneyPanel extends JFrame {
 		
 		Map<String,Object> paramter=this.getParamter();
 		
-		String employeeName=(String) paramter.get("employeeName");
-		
 		ExportReportExcelService service=DataBaseUtil.getExportReportExcelService();
+		
+		EmployeeInfoService studentService=DataBaseUtil.getEmployeeInfoService();
 		
 		JFileChooser chooser = new JFileChooser();
 		chooser.setApproveButtonText("确定");  
@@ -329,16 +346,43 @@ public class PayMoneyPanel extends JFrame {
 			String filePath=chooser.getSelectedFile().getAbsolutePath();
 			String fileName="正浩服饰";
 			
-			if(StringUtils.hasText(employeeName)){
-				fileName=employeeName;
-			}
+			  if(paramter.get("employeeId")!=null){
+				   String employeeName=(String) paramter.get("employeeName");
+				   fileName=employeeName;
+				  try {
+						service.processExportFile(fileName, filePath, paramter);
+						JOptionPane.showMessageDialog(null, "导出成功了!");
+					} catch (Exception e) {
+						log.error(e.getMessage());
+						JOptionPane.showMessageDialog(null, "导出Excel失败!");
+					}
+			  }else{
+				  List<Student> studentList=studentService.loadAllStudent();
+				  boolean flag=true;
+				  for(Student student : studentList){
+					  paramter.put("employeeId", student.getId());
+					  fileName=student.getName();
+					  try {
+							service.processExportFile(fileName, filePath, paramter);
+						} catch (Exception e) {
+							flag=false;
+							log.error(e.getMessage());
+							JOptionPane.showMessageDialog(null, "导出Excel失败!");
+							break;
+						}
+				  }
+				   if(flag){
+					   JOptionPane.showMessageDialog(null, "导出成功了!");
+				   }
+				 
+				  
+			  }
+			
+		   
+		    
+		    
 		
-		    try {
-				service.processExportFile(fileName, filePath, paramter);
-			} catch (Exception e) {
-				log.error(e.getMessage());
-				JOptionPane.showMessageDialog(null, "导出Excel失败!");
-			}
+		  
 		}
 		
 		
@@ -544,24 +588,18 @@ public class PayMoneyPanel extends JFrame {
 		
 		
 		//默认加载本月的结算信息
-		SimpleDateFormat formate=new SimpleDateFormat("yyyy-MM-dd");
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.set(Calendar.DAY_OF_MONTH, 1);
-        String firstDay = formate.format(calendar.getTime());
-        
-        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));  
-        String lastDay = formate.format(calendar.getTime());
+	    String selectMonthFieldValue=selectMonthField.getSelectedItem().toString();
+	    
         
 		if(StringUtils.hasText(startPayDate)){
 			allCountMap.put("startPayDate", startPayDate);
-		}else{
-			allCountMap.put("startPayDate", firstDay);
 		}
 		if(StringUtils.hasText(endPayDate)){
 			allCountMap.put("endPayDate", endPayDate);
-		}else{
-			allCountMap.put("endPayDate", lastDay);
+		}
+		
+		if(StringUtils.hasText(selectMonthFieldValue) && !(selectMonthFieldValue).equals("0") ){
+			allCountMap.put("monthName", selectMonthFieldValue);
 		}
 		
 		

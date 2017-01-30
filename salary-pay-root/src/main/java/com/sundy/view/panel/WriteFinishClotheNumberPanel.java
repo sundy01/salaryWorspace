@@ -268,7 +268,7 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 					 if(i!=0 && i!=1){
 						 
 						 String headValuestr=(String) headData.get(i);
-						 String[] headValueList=headValuestr.split("|");
+						 String[] headValueList=headValuestr.split("\\|");
 						 Integer processId=Integer.valueOf(headValueList[0]);
 						 
 						 Object finishNum=dataRow.get(i);

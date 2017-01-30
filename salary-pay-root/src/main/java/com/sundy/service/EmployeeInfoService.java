@@ -21,6 +21,10 @@ public class EmployeeInfoService {
 	@Autowired
 	private StudentDao studentDao;
 	
+	public List<Student> loadAllStudent(){
+		return this.studentDao.loadAllStudent();
+	}
+	
 	public  Vector<StyleItem> queryAllStudentConvertItem(){
 		List<Student> list=this.studentDao.loadAllStudent();
 		

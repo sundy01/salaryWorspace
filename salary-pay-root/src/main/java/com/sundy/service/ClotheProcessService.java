@@ -52,7 +52,7 @@ public class ClotheProcessService {
 			
 		}
 		
-		if(copyDataList!=null && copyDataList.size()>3){
+		if(copyDataList!=null && copyDataList.size()>2){
 			copyDataList.remove(0);
 			copyDataList.remove(0);
 		}else{
@@ -84,7 +84,7 @@ public class ClotheProcessService {
 					String headValueStr=headValue.toString();
 					log.info("headValue=="+headValueStr);
 					
-					String[] strList=headValueStr.split("|");
+					String[] strList=headValueStr.split("\\|");
 					
 					String processIdStr=strList[0];
 					Integer processId=Integer.valueOf(processIdStr);
