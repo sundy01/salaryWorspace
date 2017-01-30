@@ -20,7 +20,7 @@ public class PayMoneyService {
 	private PayMoneyDao payMoneyDao;
 	
 	
-	public Vector queryPayMoneyBean(Map<String,Object> map){
+	public Vector<Vector> queryPayMoneyBean(Map<String,Object> map){
       
 		List<PayMoneyBean> list=this.payMoneyDao.queryPayMoneyBean(map);
 		Vector dataList=new Vector();

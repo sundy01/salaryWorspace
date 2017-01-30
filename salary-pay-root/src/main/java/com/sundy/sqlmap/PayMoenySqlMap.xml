@@ -44,6 +44,7 @@
 							    jk_process_finish a
 							WHERE
 							    1=1 
+							    and a.finishNum>0
 							) m  where 1=1 
 							<if test="styleCode != null">
 					             <![CDATA[
@@ -94,6 +95,7 @@
 							    jk_process_finish a
 							WHERE
 							    1=1 
+							    and a.finishNum>0
 							) m  where 1=1 
 							<if test="styleId != null">
 					             <![CDATA[

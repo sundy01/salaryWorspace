@@ -70,12 +70,13 @@ public class PayMoneyPanel extends JFrame {
 	private static int totalPage; //总共多少页
 	private JLabel allPageLabel; //共多少页
 	private JLabel currentPageLabel; //当前第几页
-	private static int pageSize=500; //每页显示20条
+	private static int pageSize=1000; //每页显示20条
 	private static Vector headData; //列头
 	private JTextField styleCombox;
 	private KeyValComboBox employeeCombox;
 	private DatePickPanel startDateTextField;
 	private DatePickPanel endDateTextField;
+	private JLabel sumMoney;
 
 	/**
 	 * Launch the application.
@@ -133,6 +134,10 @@ public class PayMoneyPanel extends JFrame {
 		JLabel label_1 = new JLabel("员工名称:");
 		label_1.setBounds(319, 29, 69, 15);
 		contentPane.add(label_1);
+		
+		sumMoney = new JLabel("");
+		sumMoney.setBounds(690, 75, 300, 23);
+		contentPane.add(sumMoney);
 		
 		//设置员工下拉框
 		EmployeeInfoService employeeService=DataBaseUtil.getEmployeeInfoService();
@@ -283,6 +288,12 @@ public class PayMoneyPanel extends JFrame {
 		JButton reflashButton = new JButton("刷新");
 		reflashButton.setBounds(710, 608, 93, 23);
 		contentPane.add(reflashButton);
+		
+		JLabel lblNewLabel_2 = new JLabel("总金额:");
+		lblNewLabel_2.setBounds(614, 79, 63, 15);
+		contentPane.add(lblNewLabel_2);
+		
+	
 		
 		reflashButton.addActionListener(new ActionListener() {
 			
@@ -577,7 +588,19 @@ public class PayMoneyPanel extends JFrame {
 			mapParamter.put("rowNum", rowNum);
 			mapParamter.put("pageSize",pageSize);
 			mapParamter.putAll(paramterMap);
-			Vector dataList=service.queryPayMoneyBean(mapParamter);
+			Vector<Vector> dataList=service.queryPayMoneyBean(mapParamter);
+			
+			//统计金额
+			BigDecimal sumCount=new BigDecimal(0);
+			for(Vector vector : dataList){
+			
+				BigDecimal currentValue=(BigDecimal) vector.get(7);
+				sumCount=sumCount.add(currentValue);
+			}
+		
+			
+			this.sumMoney.setText(sumCount+"");
+			
 			
 			DefaultTableModel tableMode=new DefaultTableModel(dataList,headData){
 				@Override

@@ -4,12 +4,15 @@ import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -17,6 +20,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -26,9 +30,12 @@ import org.apache.log4j.Logger;
 import org.springframework.util.StringUtils;
 
 import com.sundy.domain.ProcessBean;
+import com.sundy.domain.ProcessBeanVo;
+import com.sundy.domain.ProcessFinishNumBean;
 import com.sundy.service.ClotheProcessService;
 import com.sundy.service.DataBaseUtil;
 import com.sundy.service.EmployeeInfoService;
+import com.sundy.service.ProcessFinishNumService;
 
 public class WriteFinishClotheNumberPanel extends JFrame {
 	private static final Logger log=Logger.getLogger(WriteFinishClotheNumberPanel.class);
@@ -49,7 +56,7 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					WriteFinishClotheNumberPanel frame = new WriteFinishClotheNumberPanel(71);
+					WriteFinishClotheNumberPanel frame = new WriteFinishClotheNumberPanel(1);
 					frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -66,7 +73,6 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 		//构建表头数据
 		ClotheProcessService processService=DataBaseUtil.getClotheProcessService();
 		headData=new Vector();
-		headData.add("序号");
 		headData.add("员工编码");
 		headData.add("员工姓名");
 		List<ProcessBean> processHeadData=processService.getProcessDataByStyleId(styleId);
@@ -202,13 +208,116 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 		saveButton = new JButton("保存");
 		saveButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
+				saveDataMethod();
 			}
 		});
 		saveButton.setBounds(891, 585, 93, 23);
+		
+		
+		
+		
+		
+		//注册快捷键ctrl+s
+	 this.saveButton.registerKeyboardAction(new ActionListener() {
+		
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			
+			try{
+				  saveDataMethod();
+				  refushDataTable();
+			}catch(Exception es){
+				
+				 log.error(es.getMessage());
+				 JOptionPane.showMessageDialog(null,es.getMessage(), "标题",JOptionPane.ERROR_MESSAGE); 
+			}finally{
+				saveButton.setEnabled(true);
+			}
+			
+		}
+	}, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW); 
+		
+		
 		contentPane.add(saveButton);
 		
 	
 		
+		
+	}
+	
+	private void saveDataMethod(){
+		DefaultTableModel currentDataModel=(DefaultTableModel) table.getModel();
+		Vector<Vector> allData=currentDataModel.getDataVector();
+		
+		List<ProcessBeanVo> processBeanVoList=new ArrayList<ProcessBeanVo>();
+		
+		ClotheProcessService processService=DataBaseUtil.getClotheProcessService();
+		
+		ProcessFinishNumService finishNumService=DataBaseUtil.getProcessFinishNumService();
+		
+		List<ProcessFinishNumBean> finishListData=new ArrayList<ProcessFinishNumBean>();
+		
+		if(allData!=null && allData.size()>0){
+			for(Vector dataRow: allData){
+
+				Integer employeeId=(Integer) dataRow.get(0);
+				String employeeName=(String) dataRow.get(1);
+				
+				for(int i=0;i<headData.size();i++){
+					  
+					 if(i!=0 && i!=1){
+						 
+						 String headValuestr=(String) headData.get(i);
+						 String[] headValueList=headValuestr.split("|");
+						 Integer processId=Integer.valueOf(headValueList[0]);
+						 
+						 Object finishNum=dataRow.get(i);
+						 
+						 System.out.println("员工="+employeeName+" 工序id="+processId+" 完成件数=="+finishNum);
+						 
+						 ProcessBeanVo vo=new ProcessBeanVo();
+						 vo.setEmployeeId(employeeId);
+                         vo.setEmployeeName(employeeName);
+                         vo.setProcessId(processId);
+                         if(finishNum instanceof Integer){
+                        	 vo.setFinishNumCount((Integer)finishNum);
+                         }else if(finishNum instanceof String){
+                        	 Integer currentValue=Integer.valueOf(finishNum.toString());
+                        	 vo.setFinishNumCount(currentValue);
+                         }else{
+                        	 vo.setFinishNumCount(0);
+                         }
+                         
+                         
+                         
+                     	Map<String,Object> parameterMap=new HashMap<String,Object>();
+        				parameterMap.put("styleId", this.styelId);
+        				parameterMap.put("employeeId", employeeId);
+        				parameterMap.put("processId", processId);
+    					List<ProcessFinishNumBean> finishNumList=processService.getProcessFinishNumBeanByMap(parameterMap);
+    					if(finishNumList!=null && finishNumList.size()>1){
+    						JOptionPane.showMessageDialog(null,"出错了额");
+    					}else if(finishNumList!=null && finishNumList.size()==1){
+    						ProcessFinishNumBean currentFinishNumBean=finishNumList.get(0);
+    						vo.setFinishNumId(currentFinishNumBean.getId());
+    						
+    					}
+                         
+    					processBeanVoList.add(vo);
+					 }
+					 
+				}
+				
+				
+				 
+			}
+		}
+		
+		if(processBeanVoList!=null && processBeanVoList.size()>0){
+			finishNumService.saveOrUpdateProcessFinhsNum(processBeanVoList);
+			
+			refushDataTable();
+		}
 		
 	}
 
@@ -341,30 +450,20 @@ public class WriteFinishClotheNumberPanel extends JFrame {
 			
 			currentPageNum=pageNum;
 			int rowNum=(currentPageNum-1)*pageSize; 
-			Map<String,Object> mapParamter=new HashMap<String,Object>();
-			mapParamter.put("rowNum", rowNum);
-			mapParamter.put("pageSize",pageSize);
+		
 			
 			
-			int columnSize=headData.size();
+			ClotheProcessService processServiceInner=DataBaseUtil.getClotheProcessService();
 			
-			Vector dataList=new Vector();
-			for(int i=0;i<10; i++){
-				
-				Vector dataRow=new Vector();
-				for(int j=0;j<columnSize;j++){
-					dataRow.add("test"+j);
-				}
-				
-				dataList.add(dataRow);
-			}
+			Vector dataList=processServiceInner.getEmployeeFinishNumData(headData, this.styelId);
+			
 			
 			DefaultTableModel tableMode=new DefaultTableModel(dataList,headData){
 
 				@Override
 				public boolean isCellEditable(int row, int column) {
 					boolean flag=true;
-					if(column==0 || column==1 || column==2){
+					if(column==0 || column==1){
 						flag=false;
 					}
 					return flag;

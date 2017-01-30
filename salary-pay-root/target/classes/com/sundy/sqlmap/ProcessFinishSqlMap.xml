@@ -19,6 +19,7 @@
 		<parameter property="id"/>
 		<parameter property="processId"/>
 		<parameter property="employeeId"/>
+		<parameter property="employeeName"/>
 		<parameter property="finishNum"/>
 		<parameter property="createDate"/>
 		<parameter property="updateDate"/>
@@ -34,6 +35,7 @@
 		    a.processId=b.id
 		AND b.styleId=#{styleId}
 		AND a.employeeId=#{employeeId}
+		AND a.processId=#{processId}
 	</select>
 	
 	<select id="queryProcessFinishNumBean" resultMap="processFinishNumResultMap" parameterType="java.util.Map">
@@ -56,7 +58,7 @@
     </select>
 	<!--新增-->
 	<insert id="insert" parameterMap="processFinishNumParameterMap" keyProperty="id" useGeneratedKeys="true">
-		INSERT INTO jk_process_finish (id,processId, employeeId, finishNum, createDate, updateDate) VALUES (?,?,?,?,?,?)
+		INSERT INTO jk_process_finish (id,processId, employeeId,employeeName, finishNum, createDate, updateDate) VALUES (?,?,?,?,?,?,?)
 	</insert>
 
 	<!--更新-->
@@ -73,7 +75,10 @@
 				`employeeId`=#{employeeId},
 			</if>
 			<if test="updateDate != null">
-				`updateDate`=now()
+				`updateDate`=now(),
+			</if>
+		   <if test="employeeName != null">
+				`employeeName`=#{employeeName}
 			</if>
 		</trim>
 		where `id`=#{id}

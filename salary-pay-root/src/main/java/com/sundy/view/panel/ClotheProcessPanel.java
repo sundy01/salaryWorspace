@@ -6,6 +6,7 @@ import java.awt.Font;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.math.BigDecimal;
@@ -18,6 +19,7 @@ import java.util.Vector;
 
 import javax.jws.soap.SOAPBinding.Style;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,6 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
@@ -272,6 +275,26 @@ public class ClotheProcessPanel extends JFrame {
 				 
 			}
 		});
+		 
+			//注册快捷键ctrl+s
+		 this.saveButton.registerKeyboardAction(new ActionListener() {
+			
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				
+				try{
+					  saveOpertionMethod();
+					  refushDataTable();
+				}catch(Exception es){
+					
+					 log.error(es.getMessage());
+					 JOptionPane.showMessageDialog(null,es.getMessage(), "标题",JOptionPane.ERROR_MESSAGE); 
+				}finally{
+					saveButton.setEnabled(true);
+				}
+				
+			}
+		}, KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK), JComponent.WHEN_IN_FOCUSED_WINDOW); 
 	
 		contentPane.add(saveButton);
 		

@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sundy.dao.ProcessFinishNumDao;
+import com.sundy.domain.ProcessBeanVo;
 import com.sundy.domain.ProcessFinishNumBean;
 import com.sundy.domain.StyleItem;
 
@@ -22,6 +23,30 @@ import com.sundy.domain.StyleItem;
 public class ProcessFinishNumService {
 	@Autowired
 	private ProcessFinishNumDao processFinishNumDao;
+	
+	@Transactional
+	public void saveOrUpdateProcessFinhsNum(List<ProcessBeanVo> processBeanVoList){
+		
+		for(ProcessBeanVo vo : processBeanVoList){
+			ProcessFinishNumBean bean = new ProcessFinishNumBean();
+			
+			bean.setEmployeeId(vo.getEmployeeId());
+			bean.setEmployeeName(vo.getEmployeeName());
+			bean.setFinishNum(vo.getFinishNumCount());
+			bean.setProcessId(vo.getProcessId());
+			
+			if(vo.getFinishNumId()!=null && vo.getFinishNumId().intValue()!=0){
+				bean.setUpdateDate(new Date());
+				bean.setId(vo.getFinishNumId());
+				this.processFinishNumDao.update(bean);
+			}else{
+				bean.setUpdateDate(new Date());
+				bean.setCreateDate(new Date());
+				this.processFinishNumDao.insert(bean);
+			}
+		}
+		
+	}
 	
 	
 	public Vector queryProcessFinishNumByProcessId(Map<String,Object> map){

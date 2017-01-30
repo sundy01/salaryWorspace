@@ -1,0 +1,11 @@
+DROP TABLE jk_clothe_process;
+CREATE TABLE jk_clothe_process (id int NOT NULL AUTO_INCREMENT, styleId int, styleName varchar(200), processName varchar(200), processPrice decimal(10,5) unsigned, createDate datetime, updateDate datetime, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE jk_clothe_style;
+CREATE TABLE jk_clothe_style (id int NOT NULL AUTO_INCREMENT, styleName varchar(200), styleCode varchar(200), styleNum int, createDate datetime, updateDate datetime, monthName varchar(10), PRIMARY KEY (id), CONSTRAINT jk_clothe_style_ix1 UNIQUE (styleCode)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE jk_login_user;
+CREATE TABLE jk_login_user (id int NOT NULL AUTO_INCREMENT, username varchar(100), password varchar(100), createDate datetime, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+INSERT INTO jk_login_user (id, username, password, createDate) VALUES (1, 'admin', 'admin', null);
+DROP TABLE jk_process_finish;
+CREATE TABLE jk_process_finish (id int NOT NULL AUTO_INCREMENT, processId int, employeeName varchar(200), employeeId int, finishNum int, createDate datetime, updateDate datetime, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+DROP TABLE jk_student;
+CREATE TABLE jk_student (id int NOT NULL AUTO_INCREMENT, name varchar(200), birthday varchar(200), gender varchar(5), phone varchar(100), createTime datetime, PRIMARY KEY (id)) ENGINE=InnoDB DEFAULT CHARSET=utf8;

@@ -52,6 +52,13 @@ public class ProcessFinishNumBean {
 	public void setUpdateDate(Date updateDate) {
 		this.updateDate = updateDate;
 	}
+	@Override
+	public String toString() {
+		return "ProcessFinishNumBean [id=" + id + ", processId=" + processId
+				+ ", employeeName=" + employeeName + ", employeeId="
+				+ employeeId + ", finishNum=" + finishNum + ", createDate="
+				+ createDate + ", updateDate=" + updateDate + "]";
+	}
 	
 	
 
